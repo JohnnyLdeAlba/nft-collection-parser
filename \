@@ -187,17 +187,13 @@ async function plague_parse_collection(type, dir) {
 
   parser.parseOSCollection(_os_collection);
   
-  const collection = parser.collection;
+  const collection = parser;
   const trait = collection.traits.getHash(type);
 
   if (trait) {
 
     collection.getCategories()
-      .map(category => {
-
-        category.trait_filter.push(trait.serial);
-        return category;
-    });
+      .map(category => category.trait_filter.push(trait.id));
   }
 
   if (typeof dir == 'undefined')
