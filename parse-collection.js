@@ -1,14 +1,14 @@
 const { t_attribute, t_collection } = require('./lib/attributes');
 
 const {
-  getDirectories,
-  getImageFiles,
-  readOSCollection,
-  parseOSCollection,
-  readCollection,
-  writeCollection,
+  get_directories,
+  get_image_files,
+  read_os_collection,
+  parse_os_collection,
+  read_collection,
+  write_collection,
   parseTraitImages,
-  readTraitImages
+  read_trait_images
 } = require('./lib/parse-lib');
 
 class t_collection_parser {
@@ -30,25 +30,25 @@ class t_collection_parser {
   async db_update_category(category) { return 0; }
   async db_update_trait(trait) { return 0; }
 
-  async readOSCollection(dir) {
-    return await readOSCollection(dir);
+  async read_os_collection(dir) {
+    return await read_os_collection(dir);
   }
 
-  parseOSCollection(os_collection) {
-    this.collection =  parseOSCollection(os_collection);
+  parse_os_collection(os_collection) {
+    this.collection =  parse_os_collection(os_collection);
   }
 
-  async readTraitImages(dir) {
-    return await readTraitImages(this.collection, dir)
+  async read_trait_images(dir) {
+    return await read_trait_images(this.collection, dir)
   }
 
-  async writeCollection(filename) {
-    return await writeCollection(filename, this.collection);
+  async write_collection(filename) {
+    return await write_collection(filename, this.collection);
   }
 
-  async readCollection(filename) {
+  async read_collection(filename) {
 
-    const collection = await readCollection(filename);
+    const collection = await read_collection(filename);
     if (!collection)
       return -1;
 
@@ -56,7 +56,7 @@ class t_collection_parser {
     return 0;
   }
 
-  async updateCollection() {
+  async update_collection() {
 
     let result = 0;
 
@@ -64,7 +64,7 @@ class t_collection_parser {
     if (result == -1)
       return -1;
 
-    const categories = this.collection.getCategories();
+    const categories = this.collection.get_categories();
     for (const category of categories) {
 
       result = await this.db_update_category(category);
@@ -72,7 +72,7 @@ class t_collection_parser {
         return -1;
     }
 
-    const traits = this.collection.getTraits();
+    const traits = this.collection.get_traits();
     for (const trait of traits) {
 
       result = await this.db_update_trait(trait);
@@ -83,13 +83,13 @@ class t_collection_parser {
     return 0;
   }
 
-  async insertCollection() {
+  async insert_collection() {
 
     const collection_id = await this.db_insert_collection(this.collection);
     if (collection_id == -1)
       return -1;
 
-    const categories = this.collection.getCategories();
+    const categories = this.collection.get_categories();
     for (const category of categories) {
 
       const category_id = await this.db_insert_category(category);
@@ -99,7 +99,7 @@ class t_collection_parser {
       category.id = category_id;
     }
 
-    const traits = this.collection.getTraits();
+    const traits = this.collection.get_traits();
     for (const trait of traits) {
 
       const trait_id = await this.db_insert_trait(trait);
@@ -109,25 +109,25 @@ class t_collection_parser {
       trait.id = trait_id;
     }
 
-    this.collection.convertCollectionSerial();
-    this.collection.convertCategorySerials();
-    this.collection.convertTraitSerials();
+    this.collection.convert_collection_serial();
+    this.collection.convert_category_serials();
+    this.collection.convert_trait_serials();
 
-    let result = await this.updateCollection();
+    let result = await this.update_collection();
     if (result == -1)
       return -t;
 
-    this.collection.updateSerials();
+    this.collection.update_serials();
     return 0;
   }
 
-  async mergeCollection(collection) {
+  async merge_collection(collection) {
 
     const collection_id = await this.db_insert_collection(collection);
     if (collection_id == -1)
       return -1;
 
-    const categories = collection.getCategories();
+    const categories = collection.get_categories();
     for (const category of categories) {
 
       const category_id = await this.db_insert_category(category);
@@ -137,7 +137,7 @@ class t_collection_parser {
       category.id = category_id;
     }
 
-    const traits = collection.getTraits();
+    const traits = collection.get_traits();
     for (const trait of traits) {
 
       const trait_id = await this.db_insert_trait(trait);
@@ -147,15 +147,15 @@ class t_collection_parser {
       trait.id = trait_id;
     }
 
-    collection.convertCollectionSerial();
-    collection.convertCategorySerials();
-    collection.convertTraitSerials();
+    collection.convert_collection_serial();
+    collection.convert_category_serials();
+    collection.convert_trait_serials();
 
-    let result = await this.updateCollection();
+    let result = await this.update_collection();
     if (result == -1)
       return -t;
 
-    collection.updateSerials();
+    collection.update_serials();
     this.collection.push(collection);
 
     return 0;
@@ -166,7 +166,7 @@ async function plague_parse_collection(type, dir) {
 
   const parser = new t_collection_parser();
 
-  const os_collection = await parser.readOSCollection(
+  const os_collection = await parser.read_os_collection(
     "collections/the-plague-nft/metadata");
 
   const _os_collection = [];
@@ -185,14 +185,14 @@ async function plague_parse_collection(type, dir) {
     }
   }
 
-  parser.parseOSCollection(_os_collection);
+  parser.parse_os_collection(_os_collection);
   
   const collection = parser.collection;
-  const trait = collection.traits.getHash(type);
+  const trait = collection.traits.get_hash(type);
 
   if (trait) {
 
-    collection.getCategories()
+    collection.get_categories()
       .map(category => {
 
         category.trait_filter.push(trait.serial);
@@ -203,7 +203,7 @@ async function plague_parse_collection(type, dir) {
   if (typeof dir == 'undefined')
     return parser.collection;
 
-  await parser.readTraitImages(dir);
+  await parser.read_trait_images(dir);
   return parser.collection;
 }
 
@@ -215,25 +215,25 @@ async function parse_collection() {
 
   const parser = new t_collection_parser();
 
-  await parser.mergeCollection(one_collection);
-  await parser.mergeCollection(og_collection);
-  await parser.mergeCollection(army_collection);
+  await parser.merge_collection(one_collection);
+  await parser.merge_collection(og_collection);
+  await parser.merge_collection(army_collection);
 
-  await parser.writeCollection("the-plague-nft.json");
+  await parser.write_collection("the-plague-nft.json");
 
   process.exit();
 }
 
-async function read_collection() {
+async function load_collection() {
 
   let parser = new t_collection_parser();
 
-  await parser.readCollection("the-plague-nft-og.json");
-  await parser.insertCollection();
-  await parser.writeCollection("the-plague-nft-og.json");
+  await parser.read_collection("the-plague-nft-og.json");
+  await parser.insert_collection();
+  await parser.write_collection("the-plague-nft-og.json");
 
   process.exit();
 }
 
-parse_collection();
-// read_collection();
+// parse_collection();
+load_collection();
