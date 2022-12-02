@@ -195,7 +195,7 @@ async function plague_parse_collection(type, dir) {
     collection.get_categories()
       .map(category => {
 
-        category.trait_filter.push(trait.serial);
+        category.filter.push(trait.serial);
         return category;
     });
   }
