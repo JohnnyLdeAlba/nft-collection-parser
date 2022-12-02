@@ -235,5 +235,5 @@ async function load_collection() {
   process.exit();
 }
 
-// parse_collection();
-load_collection();
+parse_collection();
+// load_collection();
